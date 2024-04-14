@@ -1,8 +1,6 @@
-module rcache
+module github.com/weisbartb/rcache
 
 go 1.20
-
-replace github.com/weisbartb/rcache v1.0.0 => ./
 
 require github.com/stretchr/testify v1.9.0
 
