@@ -19,7 +19,7 @@ type InstructionSet interface {
 	Skip(tag string) bool
 	// GetMetadata is the constructor for the InstructionSet.
 	// This is called for every field and allows you to programmatically set up the metadata for said field.
-	GetMetadata(fieldType reflect.Type, tag string) InstructionSet
+	GetMetadata(field reflect.StructField, tag string) InstructionSet
 }
 
 type FieldCache[Instructions InstructionSet] struct {
@@ -110,7 +110,7 @@ func (rc *Cache[Metadata]) GetTypeDataFor(t reflect.Type) *FieldCache[Metadata] 
 			// De-reference the return to not create side effects
 			child := *rc.GetTypeDataFor(f.Type)
 			child.Idx = i
-			md := rc.md.GetMetadata(f.Type, tag)
+			md := rc.md.GetMetadata(f, tag)
 			if md != nil {
 				child.metadata = md.(Metadata)
 			} else {

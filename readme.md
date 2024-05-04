@@ -22,7 +22,7 @@ type InstructionSet interface {
 FieldName(tag string) string
 TagNamespace() string
 Skip(tag string) bool
-GetMetadata(fieldType reflect.Type, tag string) InstructionSet
+GetMetadata(fieldType reflect.Type, fieldName,tag string) InstructionSet
 }
 ```
 
