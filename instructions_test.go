@@ -1,11 +1,13 @@
 package rcache_test
 
 import (
-	"github.com/stretchr/testify/require"
-	"rcache"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/weisbartb/rcache"
 )
 
 type embeddedStruct struct {
@@ -55,7 +57,7 @@ func (i InstructionSet) Skip(tag string) bool {
 	return tag == "-"
 }
 
-func (i InstructionSet) GetMetadata(fieldType reflect.Type, tag string) rcache.InstructionSet {
+func (i InstructionSet) GetMetadata(fieldType reflect.StructField, tag string) rcache.InstructionSet {
 	tagParts := strings.Split(tag, ",")
 	if tagParts[0] == "-" {
 		// skip
