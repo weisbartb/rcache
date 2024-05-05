@@ -74,7 +74,7 @@ func (i InstructionSet) GetMetadata(fieldType reflect.StructField, tag string) r
 
 func TestReflectionCache_GetTypeDataFor(t *testing.T) {
 	t.Run("basic", func(t *testing.T) {
-		c := rcache.NewCache(InstructionSet{})
+		c := rcache.NewCache[InstructionSet]()
 		r := c.GetTypeDataFor(reflect.TypeOf(simpleStruct{}))
 		require.NotEmpty(t, r)
 		require.Len(t, r.Fields(), 2)
@@ -83,13 +83,13 @@ func TestReflectionCache_GetTypeDataFor(t *testing.T) {
 		require.Len(t, r.Fields()[1].Fields()[0].InstructionData().AllowedGroups, 1)
 	})
 	t.Run("recursive", func(t *testing.T) {
-		c := rcache.NewCache(InstructionSet{})
+		c := rcache.NewCache[InstructionSet]()
 		r := c.GetTypeDataFor(reflect.TypeOf(RecursiveStruct{}))
 		require.Equal(t, r.Fields(), r.Fields()[0].Fields())
 		require.NotEmpty(t, r)
 	})
 	t.Run("complex", func(t *testing.T) {
-		c := rcache.NewCache(InstructionSet{})
+		c := rcache.NewCache[InstructionSet]()
 		r := c.GetTypeDataFor(reflect.TypeOf(complexStruct{}))
 		require.NotEmpty(t, r)
 		require.Len(t, r.Fields(), 2)

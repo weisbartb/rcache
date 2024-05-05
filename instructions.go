@@ -46,13 +46,11 @@ func (fc *FieldCache[Instructions]) InstructionData() Instructions {
 type Cache[Metadata InstructionSet] struct {
 	mu sync.RWMutex
 	m  map[reflect.Type]*FieldCache[Metadata]
-	md Metadata
 }
 
-func NewCache[Metadata InstructionSet](md Metadata) *Cache[Metadata] {
+func NewCache[Metadata InstructionSet]() *Cache[Metadata] {
 	return &Cache[Metadata]{
-		m:  make(map[reflect.Type]*FieldCache[Metadata]),
-		md: md,
+		m: make(map[reflect.Type]*FieldCache[Metadata]),
 	}
 }
 
@@ -67,7 +65,7 @@ func (rc *Cache[Metadata]) GetTypeDataFor(t reflect.Type) *FieldCache[Metadata] 
 		return cData
 	}
 	rc.mu.RUnlock()
-	var tagNamespace = rc.md.TagNamespace()
+	var tagNamespace = emptyMetadata.TagNamespace()
 	var out = &FieldCache[Metadata]{
 		fieldMap: map[string]*FieldCache[Metadata]{},
 	}
@@ -86,10 +84,10 @@ func (rc *Cache[Metadata]) GetTypeDataFor(t reflect.Type) *FieldCache[Metadata] 
 				}
 			}
 			tag := f.Tag.Get(tagNamespace)
-			if rc.md.Skip(tag) {
+			if emptyMetadata.Skip(tag) {
 				continue
 			}
-			var fieldName = rc.md.FieldName(tag)
+			var fieldName = emptyMetadata.FieldName(tag)
 			if len(fieldName) == 0 {
 				fieldName = f.Name
 			}
@@ -99,9 +97,8 @@ func (rc *Cache[Metadata]) GetTypeDataFor(t reflect.Type) *FieldCache[Metadata] 
 			}
 			if fType == t {
 				node := &FieldCache[Metadata]{
-					Idx:      i,
-					fields:   out.fields,
-					metadata: rc.md,
+					Idx:    i,
+					fields: out.fields,
 				}
 				*out.fields = append(*out.fields, node)
 				out.fieldMap[fieldName] = node
@@ -110,7 +107,7 @@ func (rc *Cache[Metadata]) GetTypeDataFor(t reflect.Type) *FieldCache[Metadata] 
 			// De-reference the return to not create side effects
 			child := *rc.GetTypeDataFor(f.Type)
 			child.Idx = i
-			md := rc.md.GetMetadata(f, tag)
+			md := emptyMetadata.GetMetadata(f, tag)
 			if md != nil {
 				child.metadata = md.(Metadata)
 			} else {
@@ -122,9 +119,7 @@ func (rc *Cache[Metadata]) GetTypeDataFor(t reflect.Type) *FieldCache[Metadata] 
 	case reflect.Array, reflect.Slice, reflect.Map:
 		out = rc.GetTypeDataFor(t.Elem())
 	default:
-		out = &FieldCache[Metadata]{
-			metadata: rc.md,
-		}
+		out = &FieldCache[Metadata]{}
 	}
 	rc.mu.Lock()
 	defer rc.mu.Unlock()

@@ -3,7 +3,14 @@
 ## Purpose
 
 This library provides caching functionality along with parsing instructions for reflected structs.
-The goal is to allow for parse once, call multiple times object caching for tag metadata.
+The goal of this library is
+to limit repeat reflection calls and any computation that can be done on first struct analysis.
+
+Examples:
+- Tags
+- Memoized encoder/decoders
+
+
 Any metadata instruction can be captured, interpreted, and recalled as needed.
 This was inspired after writing multiple object caches to pull tag data and cache their tag structure.
 
@@ -11,7 +18,7 @@ This was inspired after writing multiple object caches to pull tag data and cach
 
 ```go
 
-var cache = NewCache[InstructionSet](md InstructionSet)
+var cache = NewCache[InstructionSet]()
 md := cache.GetTypeDataFor(reflect.TypeOf(myStruct{}))
 ```
 
@@ -19,10 +26,10 @@ md := cache.GetTypeDataFor(reflect.TypeOf(myStruct{}))
 
 ```go
 type InstructionSet interface {
-FieldName(tag string) string
-TagNamespace() string
-Skip(tag string) bool
-GetMetadata(field reflect.StructField, tag string) InstructionSet
+    FieldName(tag string) string
+    TagNamespace() string
+    Skip(tag string) bool
+    GetMetadata(field reflect.StructField, tag string) InstructionSet
 }
 ```
 
@@ -54,4 +61,4 @@ to memoize the mutation function with any static parsing done when the `GetMetad
 ### Slices, Arrays, Maps are supported, but only operate on elements
 
 Only the element for the given collections is cacheable for the collection.
-Keys for maps (regardless of types) are not cachable and will not show up.
+Keys for maps (regardless of types) are not cachable and not accessible in the metadata.
